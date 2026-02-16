@@ -14,25 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
     let score = 0;
     let currentQuestions = [];
     let currentIndex = 0;
+    let editingIndex = null;
 
     const loginModal = document.getElementById("loginModal");
     const adminBtn = document.getElementById("adminBtn");
     const adminPanel = document.getElementById("adminPanel");
     const userPanel = document.getElementById("userPanel");
 
-    // ========================
-    // MỞ MODAL ADMIN
-    // ========================
+    // ================= ADMIN LOGIN =================
     adminBtn.addEventListener("click", function () {
         loginModal.style.display = "flex";
     });
 
-    // ========================
-    // LOGIN ADMIN
-    // ========================
     window.loginAdmin = function () {
         const passwordInput = document.getElementById("adminPassword").value;
-
         if (passwordInput === ADMIN_PASSWORD) {
             loginModal.style.display = "none";
             adminPanel.classList.remove("hidden");
@@ -43,26 +38,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    // ========================
-    // QUAY LẠI USER
-    // ========================
     window.backToUser = function () {
         adminPanel.classList.add("hidden");
         userPanel.classList.remove("hidden");
-        document.getElementById("adminPassword").value = "";
     };
 
-    // ========================
-    // LƯU DATA
-    // ========================
+    // ================= DATA =================
     function saveData() {
         localStorage.setItem("topics", JSON.stringify(topics));
         localStorage.setItem("questions", JSON.stringify(questions));
     }
 
-    // ========================
-    // ADMIN
-    // ========================
+    // ================= TOPIC CRUD =================
     window.addTopic = function () {
         const t = document.getElementById("newTopic").value.trim();
         if (!t) return;
@@ -73,6 +60,17 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("newTopic").value = "";
     };
 
+    window.deleteTopic = function (index) {
+        const topicName = topics[index];
+
+        topics.splice(index, 1);
+        questions = questions.filter(q => q.topic !== topicName);
+
+        saveData();
+        renderAll();
+    };
+
+    // ================= QUESTION CRUD =================
     window.addQuestion = function () {
         const topic = document.getElementById("adminTopicSelect").value;
         const q = document.getElementById("newQuestion").value.trim();
@@ -80,7 +78,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!topic || !q || !a) return;
 
-        questions.push({ topic, question: q, answer: a });
+        if (editingIndex !== null) {
+            questions[editingIndex] = { topic, question: q, answer: a };
+            editingIndex = null;
+        } else {
+            questions.push({ topic, question: q, answer: a });
+        }
+
         saveData();
         renderAll();
 
@@ -88,7 +92,25 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("newAnswer").value = "";
     };
 
+    window.editQuestion = function (index) {
+        const q = questions[index];
+
+        document.getElementById("adminTopicSelect").value = q.topic;
+        document.getElementById("newQuestion").value = q.question;
+        document.getElementById("newAnswer").value = q.answer;
+
+        editingIndex = index;
+    };
+
+    window.deleteQuestion = function (index) {
+        questions.splice(index, 1);
+        saveData();
+        renderAll();
+    };
+
+    // ================= RENDER ADMIN =================
     function renderAdmin() {
+
         const topicSelect = document.getElementById("adminTopicSelect");
         topicSelect.innerHTML = "";
 
@@ -97,17 +119,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.getElementById("topicList").innerHTML =
-            topics.map(t => `<li>${t}</li>`).join("");
+            topics.map((t, i) =>
+                `<li>
+                    ${t}
+                    <button onclick="deleteTopic(${i})" style="background:#ef4444;margin-left:10px;">X</button>
+                 </li>`
+            ).join("");
 
         document.getElementById("adminQuestionList").innerHTML =
-            questions.map(q =>
-                `<div class="question-card">${q.topic} - ${q.question}</div>`
+            questions.map((q, i) =>
+                `<div class="question-card">
+                    <strong>${q.topic}</strong><br>
+                    ${q.question}<br>
+                    <button onclick="editQuestion(${i})">Sửa</button>
+                    <button onclick="deleteQuestion(${i})" style="background:#ef4444;">Xóa</button>
+                </div>`
             ).join("");
     }
 
-    // ========================
-    // USER QUIZ
-    // ========================
+    // ================= USER QUIZ =================
     window.startQuiz = function () {
         const topic = document.getElementById("userTopicSelect").value;
         currentQuestions = questions.filter(q => q.topic === topic);
@@ -151,7 +181,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentIndex++;
                 showQuestion();
             }, 1000);
-
         } else {
             result.innerHTML = `<div class="wrong">❌ Sai rồi!</div>`;
         }
@@ -167,9 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAdmin();
     }
 
-    // ========================
-    // CONFETTI
-    // ========================
+    // ================= CONFETTI =================
     function launchConfetti() {
         for (let i = 0; i < 25; i++) {
             const confetti = document.createElement("div");
@@ -191,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 { transform: "translate(0,0)", opacity: 1 },
                 {
                     transform:
-                        `translate(${Math.cos(angle) * distance}px, 
+                        `translate(${Math.cos(angle) * distance}px,
                                    ${Math.sin(angle) * distance}px)`,
                     opacity: 0
                 }
