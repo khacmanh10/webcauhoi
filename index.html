@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study App Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NÚT ADMIN GÓC TRÊN PHẢI -->
+<button id="adminBtn" class="admin-fixed-btn">Admin</button>
+
+<div class="app-wrapper">
+
+    <!-- USER PANEL -->
+    <section id="userPanel">
+        <h2>🎯 Luyện tập</h2>
+        <div class="score-box">Điểm: <span id="score">0</span></div>
+        <select id="userTopicSelect" onchange="startQuiz()"></select>
+        <div id="quizContainer"></div>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section id="adminPanel" class="hidden">
+        <div class="admin-header">
+            <h2>Trang Quản Trị</h2>
+            <button onclick="backToUser()">← Quay lại</button>
+        </div>
+
+        <h3>Chủ đề</h3>
+        <input type="text" id="newTopic" placeholder="Tên chủ đề">
+        <button onclick="addTopic()">Thêm Chủ đề</button>
+        <ul id="topicList"></ul>
+
+        <h3>Câu hỏi</h3>
+        <select id="adminTopicSelect"></select>
+        <input type="text" id="newQuestion" placeholder="Câu hỏi">
+        <input type="text" id="newAnswer" placeholder="Đáp án">
+        <button onclick="addQuestion()">Thêm Câu hỏi</button>
+
+        <div id="adminQuestionList"></div>
+    </section>
+
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <h2>Đăng nhập Admin</h2>
+        <input type="password" id="adminPassword" placeholder="Mật khẩu">
+        <button onclick="loginAdmin()">Đăng nhập</button>
+    </div>
+</div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
